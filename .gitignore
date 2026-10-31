@@ -1,0 +1,17 @@
+# Build folders
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# IDE files
+.vscode/
+
+# Logs
+*.log
+
+# Local configuration
+appsettings.Development.json
