@@ -1,9 +1,11 @@
+using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using MovieTicketBooking.Repositories;
 using MovieTicketBooking.Data;
 using MovieTicketBooking.Repositories.Interfaces;
 using MovieTicketBooking.Services;
 using MovieTicketBooking.Services.Interfaces;
+
 
 // Authentication & Authorization
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -109,6 +111,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
+// Database Seeding
+await RoleSeeder.SeedAsync(app.Services);
+await UserSeeder.SeedAsync(app.Services);
+
 // =====================================================
 // HTTP Request Pipeline
 // =====================================================
@@ -116,8 +122,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
-
 app.UseHttpsRedirection();
 
 // Authentication MUST come before Authorization
