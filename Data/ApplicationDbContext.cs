@@ -12,7 +12,9 @@ namespace MovieTicketBooking.Data
         {
         }
 
-        // Movies table
+        // Movies table--- ****
         public DbSet<Movie> Movies { get; set; }
+        public DbSet<Theatre> Theatres { get; set; }
+
     }
 }
