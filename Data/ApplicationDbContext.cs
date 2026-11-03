@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MovieTicketBooking.Models;
 
 namespace MovieTicketBooking.Data
@@ -17,28 +16,46 @@ namespace MovieTicketBooking.Data
         public DbSet<Theatre> Theatres { get; set; }
         public DbSet<Screen> Screens { get; set; }
         public DbSet<Seat> Seats { get; set; }
-        
+        public DbSet<Show> Shows { get; set; }
 
-        // Seat table constraints
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-        //    modelBuilder.Entity<Seat>(entity =>
-        //    {
-        //        entity.Property(s => s.RowName)
-        //            .HasMaxLength(5)
-        //            .IsRequired();
+            // Seat table constraints
+            modelBuilder.Entity<Seat>(entity =>
+            {
+                entity.Property(s => s.RowName)
+                    .HasMaxLength(5)
+                    .IsRequired();
 
-        //        entity.Property(s => s.SeatType)
-        //            .HasMaxLength(30)
-        //            .IsRequired();
+                entity.Property(s => s.SeatType)
+                    .HasMaxLength(30)
+                    .IsRequired();
 
-        //        entity.ToTable(table =>
-        //            table.HasCheckConstraint(
-        //                "CK_Seats_SeatNumber",
-        //                "[SeatNumber] > 0"));
-        //    });
-        //}
+                entity.ToTable(table =>
+                    table.HasCheckConstraint(
+                        "CK_Seats_SeatNumber",
+                        "[SeatNumber] > 0"));
+            });
+
+            // Show table constraints
+            modelBuilder.Entity<Show>(entity =>
+            {
+                entity.Property(s => s.TicketPrice)
+                    .HasPrecision(10, 2);
+
+                entity.ToTable(table =>
+                {
+                    table.HasCheckConstraint(
+                        "CK_Shows_EndTime",
+                        "[EndTime] > [StartTime]");
+
+                    table.HasCheckConstraint(
+                        "CK_Shows_TicketPrice",
+                        "[TicketPrice] >= 0");
+                });
+            });
+        }
     }
 }
