@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MovieTicketBooking.Models;
+
 
 namespace MovieTicketBooking.Data
 {
-    public class ApplicationDbContext : DbContext
+    //public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
@@ -18,7 +21,7 @@ namespace MovieTicketBooking.Data
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Show> Shows { get; set; }
         
-       public DbSet<ShowSeat> ShowSeats { get; set; }
+        public DbSet<ShowSeat> ShowSeats { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingSeat> BookingSeats { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -134,7 +137,9 @@ namespace MovieTicketBooking.Data
                 entity.ToTable(table =>
                     table.HasCheckConstraint(
                         "CK_BookingSeats_Price",
-                        "[Price] >= 0"));
+                        "[Price] >= 0"))
+                
+                ;
 
                 entity.HasOne(bs => bs.Booking)
                     .WithMany()
