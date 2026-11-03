@@ -17,7 +17,7 @@ namespace MovieTicketBooking.Data
         public DbSet<Screen> Screens { get; set; }
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Show> Shows { get; set; }
-
+        public DbSet<ShowSeat> ShowSeats { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -56,6 +56,29 @@ namespace MovieTicketBooking.Data
                         "[TicketPrice] >= 0");
                 });
             });
+            // ShowSeat table constraints
+            modelBuilder.Entity<ShowSeat>(entity =>
+            {
+                entity.Property(s => s.Status)
+                    .HasMaxLength(20)
+                    .IsRequired();
+
+                entity.HasOne(s => s.Show)
+                    .WithMany()
+                    .HasForeignKey(s => s.ShowId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(s => s.Seat)
+                    .WithMany()
+                    .HasForeignKey(s => s.SeatId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.ToTable(table =>
+                    table.HasCheckConstraint(
+                        "CK_ShowSeats_Status",
+                        "[Status] IN ('Available', 'Booked')"));
+            });
         }
+
     }
 }
