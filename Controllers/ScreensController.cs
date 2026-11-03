@@ -1,0 +1,83 @@
+﻿
+using Microsoft.AspNetCore.Mvc;
+using MovieTicketBooking.DTOs.Screens;
+using MovieTicketBooking.Services.Interfaces;
+
+namespace MovieTicketBooking.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ScreensController : ControllerBase
+    {
+        private readonly IScreenService _screenService;
+
+        public ScreensController(IScreenService screenService)
+        {
+            _screenService = screenService;
+        }
+
+        // GET: api/screens?theatreId=1
+        [HttpGet]
+        public async Task<IActionResult> GetAllScreens(int? theatreId)
+        {
+            var screens = await _screenService.GetAllScreensAsync(theatreId);
+            return Ok(screens);
+        }
+
+        // GET: api/screens/1
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetScreenById(int id)
+        {
+            var screen = await _screenService.GetScreenByIdAsync(id);
+
+            if (screen == null)
+                return NotFound(new { message = "Screen not found." });
+
+            return Ok(screen);
+        }
+
+        // GET: api/screens/theatre/1
+        [HttpGet("theatre/{theatreId:int}")]
+        public async Task<IActionResult> GetScreensByTheatreId(int theatreId)
+        {
+            var screens = await _screenService.GetScreensByTheatreIdAsync(theatreId);
+            return Ok(screens);
+        }
+
+        // POST: api/screens
+        [HttpPost]
+        public async Task<IActionResult> CreateScreen(CreateScreenRequest request)
+        {
+            var screen = await _screenService.CreateScreenAsync(request);
+
+            return CreatedAtAction(
+                nameof(GetScreenById),
+                new { id = screen.ScreenId },
+                screen);
+        }
+
+        // PUT: api/screens/1
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateScreen(int id, UpdateScreenRequest request)
+        {
+            var screen = await _screenService.UpdateScreenAsync(id, request);
+
+            if (screen == null)
+                return NotFound(new { message = "Screen not found." });
+
+            return Ok(screen);
+        }
+
+        // DELETE: api/screens/1
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteScreen(int id)
+        {
+            var result = await _screenService.DeleteScreenAsync(id);
+
+            if (!result)
+                return NotFound(new { message = "Screen not found." });
+
+            return NoContent();
+        }
+    }
+}
