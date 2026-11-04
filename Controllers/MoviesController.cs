@@ -1,13 +1,19 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using MovieTicketBooking.DTOs.Movies;
-using MovieTicketBooking.Controllers;
+using Microsoft.AspNetCore.Authorization;
+
+//using MovieTicketBooking.Controllers;
 using MovieTicketBooking.Services.Interfaces;
 
 namespace MovieTicketBooking.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
+    //[ApiController]
+    //[Route("api/[controller]")]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -50,6 +56,8 @@ namespace MovieTicketBooking.Controllers
         }
 
         // 3. Create a new movie
+        [Authorize(Roles = "Admin")]
+
         [HttpPost]
         public async Task<IActionResult> CreateMovie(
             [FromBody] CreateMovieRequest request)
@@ -63,6 +71,8 @@ namespace MovieTicketBooking.Controllers
         }
 
         // 4. Update an existing movie
+        [Authorize(Roles = "Admin")]
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateMovie(
             int id,
@@ -79,6 +89,8 @@ namespace MovieTicketBooking.Controllers
         }
 
         // 5. Delete a movie
+        [Authorize(Roles = "Admin")]
+
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
@@ -106,6 +118,8 @@ namespace MovieTicketBooking.Controllers
 
             return Ok(movies);
         }
+        [Authorize(Roles = "Admin")]
+
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> PatchMovie(
     int id, PatchMovieRequest request)
@@ -122,5 +136,6 @@ namespace MovieTicketBooking.Controllers
 
             return Ok(movie);
         }
+
     }
 }

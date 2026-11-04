@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieTicketBooking.DTOs.Auth;
 using MovieTicketBooking.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MovieTicketBooking.Controllers
 {
@@ -16,7 +17,10 @@ namespace MovieTicketBooking.Controllers
         }
 
         // POST: api/auth/register
+
         [HttpPost("register")]
+        [AllowAnonymous]
+
         public async Task<IActionResult> Register(
             [FromBody] RegisterRequest request)
         {
@@ -41,6 +45,8 @@ namespace MovieTicketBooking.Controllers
 
         // POST: api/auth/login
         [HttpPost("login")]
+        [AllowAnonymous]
+
         public async Task<IActionResult> Login(
             [FromBody] LoginRequest request)
         {

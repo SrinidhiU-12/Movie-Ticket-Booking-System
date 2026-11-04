@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieTicketBooking.Services.Interfaces;
-
+using Microsoft.AspNetCore.Authorization;
 namespace MovieTicketBooking.Controllers
 {
     [Route("api/shows/{showId:int}/seats")]
     [ApiController]
+    [Authorize]
+
     public class ShowSeatsController : ControllerBase
     {
         private readonly IShowSeatService _showSeatService;
