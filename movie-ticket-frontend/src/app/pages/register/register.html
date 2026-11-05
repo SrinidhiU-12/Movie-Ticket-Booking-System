@@ -1,0 +1,42 @@
+<!--<p>register works!</p>-->
+<div class="register-container">
+  <div class="register-card">
+    <h1>SHOW<span>TIME</span></h1>
+    <h2>Create Account</h2>
+    <p>Join us and enjoy your favourite movies.</p>
+
+    <form (ngSubmit)="onRegister()">
+      <label>Full Name</label>
+      <input type="text" name="fullName" [(ngModel)]="fullName"
+             placeholder="Enter your full name" required />
+
+      <label>Email Address</label>
+      <input type="email" name="email" [(ngModel)]="email"
+             placeholder="Enter your email" required />
+
+      <label>Phone Number</label>
+      <input type="tel"
+             name="phoneNumber"
+             [(ngModel)]="phoneNumber"
+             placeholder="Enter your phone number"
+             required />
+
+      <label>Password</label>
+      <input type="password" name="password" [(ngModel)]="password"
+             placeholder="Create password" required />
+
+      <label>Confirm Password</label>
+      <input type="password" name="confirmPassword"
+             [(ngModel)]="confirmPassword" placeholder="Confirm password" required />
+      <p>{{ message }}</p>
+
+      <button type="submit">Create Account</button>
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <a routerLink="/">Sign In</a>
+    </p>
+  </div>
+</div>
+

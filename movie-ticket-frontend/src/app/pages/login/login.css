@@ -118,3 +118,9 @@
     padding: 25px;
   }
 }
+.message {
+  color: #b78cff;
+  font-size: 14px;
+  text-align: center;
+  margin: 12px 0;
+}

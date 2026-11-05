@@ -8,12 +8,12 @@ using MovieTicketBooking.Services.Interfaces;
 
 namespace MovieTicketBooking.Controllers
 {
+    [Authorize]
+
     [ApiController]
     [Route("api/[controller]")]
 
-    //[ApiController]
-    //[Route("api/[controller]")]
-    [Authorize]
+    
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -24,6 +24,8 @@ namespace MovieTicketBooking.Controllers
         }
 
         // 1. Get all movies with pagination and optional title filter
+        [Authorize]
+
         [HttpGet]
         public async Task<IActionResult> GetAllMovies(
             [FromQuery] int pageNumber = 1,
@@ -57,8 +59,7 @@ namespace MovieTicketBooking.Controllers
 
         // 3. Create a new movie
         [Authorize(Roles = "Admin")]
-
-        [HttpPost]
+        [HttpPost("add-movie")]
         public async Task<IActionResult> CreateMovie(
             [FromBody] CreateMovieRequest request)
         {

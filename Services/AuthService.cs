@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using MovieTicketBooking.DTOs.Auth;
 using MovieTicketBooking.Models;
@@ -28,16 +29,18 @@ namespace MovieTicketBooking.Services
         // Register a new customer
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
-            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            var email = request.Email.Trim();
+
+            var existingUser = await _userManager.FindByEmailAsync(email);
 
             if (existingUser != null)
                 throw new InvalidOperationException("Email is already registered.");
 
             var user = new ApplicationUser
             {
-                UserName = request.Email,
-                Email = request.Email,
-                FullName = request.FullName,
+                UserName = email,
+                Email = email,
+                FullName = request.FullName.Trim(),
                 PhoneNumber = request.PhoneNumber
             };
 
@@ -54,57 +57,89 @@ namespace MovieTicketBooking.Services
             // Ensure Customer role exists
             if (!await _roleManager.RoleExistsAsync("Customer"))
             {
-                var role = await _roleManager.CreateAsync(
+                var roleResult = await _roleManager.CreateAsync(
                     new IdentityRole("Customer"));
 
-                if (!role.Succeeded)
-                    throw new InvalidOperationException("Could not create Customer role.");
+                if (!roleResult.Succeeded)
+                    throw new InvalidOperationException(
+                        "Could not create Customer role.");
             }
 
             // Assign Customer role
-            await _userManager.AddToRoleAsync(user, "Customer");
+            var addRoleResult = await _userManager.AddToRoleAsync(
+                user, "Customer");
 
-            return await GenerateTokenAsync(user, "Customer");
+            if (!addRoleResult.Succeeded)
+            {
+                var errors = string.Join(", ",
+                    addRoleResult.Errors.Select(e => e.Description));
+
+                throw new InvalidOperationException(errors);
+            }
+
+            return await GenerateTokenAsync(user);
         }
 
-        // Login an existing customer
+        // Login an existing user
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var email = request.Email.Trim();
+
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                throw new UnauthorizedAccessException("Invalid email or password.");
+                throw new UnauthorizedAccessException(
+                    "Invalid email or password.");
 
             var isPasswordValid = await _userManager.CheckPasswordAsync(
                 user, request.Password);
 
             if (!isPasswordValid)
-                throw new UnauthorizedAccessException("Invalid email or password.");
+                throw new UnauthorizedAccessException(
+                    "Invalid email or password.");
 
             var roles = await _userManager.GetRolesAsync(user);
 
             if (roles.Count == 0)
-                throw new UnauthorizedAccessException("User has no assigned role.");
+                throw new UnauthorizedAccessException(
+                    "User has no assigned role.");
 
-            return await GenerateTokenAsync(user, roles[0]);
+            return await GenerateTokenAsync(user);
         }
 
-        // Generate JWT token
+        // Generate JWT token using the user's assigned roles
         private async Task<AuthResponse> GenerateTokenAsync(
-            ApplicationUser user, string role)
+            ApplicationUser user)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email ?? ""),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Email, user.Email ?? "")
             };
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var jwtKey = _configuration["Jwt:Key"];
 
             if (string.IsNullOrWhiteSpace(jwtKey))
-                throw new InvalidOperationException("JWT key is not configured.");
+                throw new InvalidOperationException(
+                    "JWT key is not configured.");
+
+            var issuer = _configuration["Jwt:Issuer"];
+            var audience = _configuration["Jwt:Audience"];
+
+            if (string.IsNullOrWhiteSpace(issuer) ||
+                string.IsNullOrWhiteSpace(audience))
+            {
+                throw new InvalidOperationException(
+                    "JWT issuer or audience is not configured.");
+            }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey));
@@ -115,8 +150,8 @@ namespace MovieTicketBooking.Services
             var expiresAt = DateTime.UtcNow.AddHours(2);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: expiresAt,
                 signingCredentials: credentials
@@ -129,7 +164,7 @@ namespace MovieTicketBooking.Services
                 Email = user.Email ?? "",
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 ExpiresAt = expiresAt,
-                Role = role
+                Role = string.Join(",", roles)
             };
         }
     }
